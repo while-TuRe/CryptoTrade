@@ -27,6 +27,7 @@ class BINACSVData(bt.CSVDataBase):
         for line in self.f:
             dq.appendleft(line)
 
+        print("BINACSVData data num:%d"%len(dq))
         f = io.StringIO(newline=None)
         f.writelines(dq)
         f.seek(0)
