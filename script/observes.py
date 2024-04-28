@@ -11,8 +11,9 @@ from sklearn import linear_model
 
 # Import the backtrader platform
 import backtrader as bt
-
+import backtrader.analyzers as btanalyzers
 from load_binance_csv import BINACSVData
+from backtrader_plotting import Bokeh
 import btc_enum
 
 
@@ -279,10 +280,10 @@ if __name__ == '__main__':
     print(currentDateAndTime)
     # Create a cerebro entity
     cerebro = bt.Cerebro(stdstats=True)
-    cerebro.addobserver(bt.observers.Broker)
-    cerebro.addobserver(bt.observers.Trades)
-    cerebro.addobserver(bt.observers.BuySell)
+    # cerebro.addobserver(bt.observers.Cash)
+    # cerebro.addobserver(bt.observers.TBrokerrades)
     # Add a strategy
+    # cerebro.addobserver(bt.observers.DrawDown)
     strats = cerebro.addstrategy(
         TestStrategy,
         maperiod=10,
@@ -293,7 +294,7 @@ if __name__ == '__main__':
     # because it could have been called from anywhere
     modpath = os.path.dirname(os.path.abspath(sys.argv[0]))
 
-    datapath = os.path.join(modpath, '..','datas','klines15m.csv')
+    datapath = os.path.join(modpath, '..','datas','klines15m_lite.csv')
     # Create a Data Feed
     data = BINACSVData(
         dataname=datapath,
@@ -316,6 +317,9 @@ if __name__ == '__main__':
     # Add the Data Feed to Cerebro
     cerebro.adddata(data)
 
+    # Analyzer
+    cerebro.addanalyzer(btanalyzers.SharpeRatio, _name='mysharpe')
+
     # Set our desired cash start
     cerebro.broker.setcash(_cash)
 
@@ -325,7 +329,9 @@ if __name__ == '__main__':
     # Set the commission
     cerebro.broker.setcommission(commission=0)
 
+
     # Run over everything
     cerebro.run(maxcpus=4)
 
-    cerebro.plot()
+    b = Bokeh(style='bar', plot_mode='single')
+    cerebro.plot(b)
